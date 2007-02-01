@@ -1,9 +1,10 @@
 require 'uri'
 require 'net/http'
-# require 'feedparser'
+# require 'feed_parser'
 
 class RssReader < Page
-
+  include FeedParser 
+  
   CACHE_DIR = '/tmp'
 
   def fetch(uri)
