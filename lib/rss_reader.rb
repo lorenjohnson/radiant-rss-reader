@@ -1,6 +1,6 @@
 require 'uri'
 require 'net/http'
-# require 'feed_parser'
+require 'feedparser'
 
 class RssReader < Page
   include FeedParser 
