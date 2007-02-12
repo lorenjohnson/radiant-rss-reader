@@ -5,7 +5,7 @@ adds some tags to fetch and display RSS feeds. It uses the
 and to only fetch the new feed if it has been modified (using the
 If-Modified-Since HTTP header).
 
-
+ 
 * INSTALLATION 
 1. Copy this entire rss_reader folder to vendor/extensions in your Radiant installation 
 2. Install the FeedParser Ruby module (http://home.gna.org/ruby-feedparser/). It can be copied to the root lib directory 
