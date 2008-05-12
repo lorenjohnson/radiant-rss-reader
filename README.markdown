@@ -37,15 +37,54 @@ Use it in your page like this (just an example):
       <dd><r:feed:content /></dd>
      </r:feed:items>
     </dl>
+    
+You can also order by some feed entry attribute other than the date:
+
+    <ul>
+
+      <r:feed:items
+          url="http://feeds.boingboing.net/boingboing/iBag" 
+          order="creator ASC">
+
+        <li><r:feed:link /></li>
+
+      </r:feed:items>
+
+    </ul>
+    
+And you can do headers to mark off sections:
+
+    <ul>
+
+      <r:feed:items
+          url="http://feeds.boingboing.net/boingboing/iBag" 
+          order="creator ASC">
+
+        <r:feed:header for="creator">
+          <h2><r:feed:creator /></h2>
+        </r:feed:header>
+
+        <li><r:feed:link /></li>
+
+      </r:feed:items>
+
+    </ul>
+
+You can sort items and group headers by date, title, content, creator, or link (i.e. the URL of the item).
 
 # CONTRIBUTORS
+
+Original Author:
+
+* Alessandro Preite Martinez (ale@incal.net)
+
 Port to Extension:
-BJ Clark (bjclark@scidept.com, http://www.scidept.com/) & Loren Johnson (loren@fn-group.com, http://www.fn-group.com)
+
+* BJ Clark (bjclark@scidept.com, http://www.scidept.com/)
+* Loren Johnson (loren@fn-group.com, http://www.fn-group.com)
 
 Modifications:
-James MacAulay (jmacaulay@gmail.com, http://jmacaulay.net/)
 
-Original Author: 
-Alessandro Preite Martinez (ale@incal.net)
+* James MacAulay (jmacaulay@gmail.com, http://jmacaulay.net/)
 
 License - Creative Commons Attribution-Share Alike 2.5 License
