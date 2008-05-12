@@ -2,7 +2,8 @@ require 'uri'
 require 'net/http'
 require 'feedparser/feedparser'
 
-class RssReader < Page
+module RssReader
+  include Radiant::Taggable
   
   def fetch_rss(uri, cache_time)
     c = File.join(ActionController::Base.page_cache_directory, uri.tr(':/','_'))
