@@ -1,0 +1,6 @@
+#### May 12, 2008
+
+* Reorganized file structure so that everything lives in vendor/extensions/rss_reader
+* RssReader is now a module mixed in to all Page objects, so any page can make use of the feed tags and there is no longer an "Rss Reader" page type.
+* cache directory is created on extension activation if none exists
+* updated README to reflect new installation instructions + add more usage examples

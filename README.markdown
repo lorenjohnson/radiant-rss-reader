@@ -70,7 +70,7 @@ And you can do headers to mark off sections:
 
     </ul>
 
-You can sort items and group headers by date, title, content, creator, or link (i.e. the URL of the item).
+You can sort items and group headers by date, title, content, creator, or link (i.e. the URL of the item). There are more things you can do, which are documented in `rss_reader.rb`.
 
 # CONTRIBUTORS
 
