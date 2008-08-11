@@ -110,7 +110,7 @@ module RssReader
     tag "feed:link" do |tag|
       attr = tag.attr.symbolize_keys
       if attr[:no_a]
-        href
+        tag.locals.item.link
       else
         options = tag.attr.dup
         attributes = options.inject('') { |s, (k, v)| s << %{#{k.downcase}="#{v}" } }.strip
