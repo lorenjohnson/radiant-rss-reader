@@ -1,5 +1,6 @@
 require 'uri'
 require 'net/http'
+require 'net/https'
 require 'feedparser/feedparser'
 
 module RssReader
@@ -15,9 +16,10 @@ module RssReader
     end
     u = URI::parse(uri)
     begin
-      http = Net::HTTP.start(u.host, u.port)
-      answer = http.get("#{u.path}", { "If-Modified-Since" => since })
-      feed = feed_for(answer.body)
+       http = Net::HTTP.new(u.host, u.port)
+       http.use_ssl = true if u.port == 443
+       answer = http.get("#{u.path}", { "If-Modified-Since" => since })
+       feed = feed_for(answer.body)
     rescue
       return cached_feed
     end
