@@ -16,7 +16,7 @@ module RssReader
     u = URI::parse(uri)
     begin
       http = Net::HTTP.start(u.host, u.port)
-      answer = http.get("#{u.path}", { "If-Modified-Since" => since })
+      answer = http.get("#{u.request_uri}", { "If-Modified-Since" => since })
       feed = feed_for(answer.body)
     rescue
       return cached_feed
