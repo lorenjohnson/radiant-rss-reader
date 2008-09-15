@@ -1,5 +1,6 @@
 require 'uri'
 require 'net/http'
+require 'net/https'
 require 'feedparser/feedparser'
 
 module RssReader
@@ -15,7 +16,8 @@ module RssReader
     end
     u = URI::parse(uri)
     begin
-      http = Net::HTTP.start(u.host, u.port)
+      http = Net::HTTP.new(u.host, u.port)
+      http.use_ssl = true if u.port == 443
       answer = http.get("#{u.request_uri}", { "If-Modified-Since" => since })
       feed = feed_for(answer.body)
     rescue
@@ -108,12 +110,17 @@ module RssReader
     end
 
     tag "feed:link" do |tag|
-      options = tag.attr.dup
-      attributes = options.inject('') { |s, (k, v)| s << %{#{k.downcase}="#{v}" } }.strip
-      attributes = " #{attributes}" unless attributes.empty?
-      href = tag.locals.item.link
-      text = tag.double? ? tag.expand : tag.locals.item.title
-      %{<a href="#{href}"#{attributes}>#{text}</a>}
+      attr = tag.attr.symbolize_keys
+      if attr[:no_a]
+        tag.locals.item.link
+      else
+        options = tag.attr.dup
+        attributes = options.inject('') { |s, (k, v)| s << %{#{k.downcase}="#{v}" } }.strip
+        attributes = " #{attributes}" unless attributes.empty?
+        href = tag.locals.item.link
+        text = tag.double? ? tag.expand : tag.locals.item.title
+        %{<a href="#{href}"#{attributes}>#{text}</a>}
+      end
     end
 
     # feed:content tag attributes
