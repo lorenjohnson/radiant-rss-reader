@@ -1,3 +1,7 @@
+#### September 15, 2008
+
+* use URI#request_uri to include URI parameters
+
 #### May 12, 2008
 
 * Reorganized file structure so that everything lives in vendor/extensions/rss_reader
