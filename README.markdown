@@ -87,5 +87,6 @@ Modifications:
 
 * James MacAulay (jmacaulay@gmail.com, http://jmacaulay.net/)
 * Michael Hale (mikehale@gmail.com, http://michaelahale.com/)
+* Bryan Liles (iam@smartic.us, http://smartic.us/)
 
 License - Creative Commons Attribution-Share Alike 2.5 License

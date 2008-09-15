@@ -110,19 +110,18 @@ module RssReader
     end
 
     tag "feed:link" do |tag|
-      attr = tag.attr.symbolize_keys
-      if attr[:no_a]
-        tag.locals.item.link
-      else
-        options = tag.attr.dup
-        attributes = options.inject('') { |s, (k, v)| s << %{#{k.downcase}="#{v}" } }.strip
-        attributes = " #{attributes}" unless attributes.empty?
-        href = tag.locals.item.link
-        text = tag.double? ? tag.expand : tag.locals.item.title
-        %{<a href="#{href}"#{attributes}>#{text}</a>}
-      end
+      options = tag.attr.dup
+      attributes = options.inject('') { |s, (k, v)| s << %{#{k.downcase}="#{v}" } }.strip
+      attributes = " #{attributes}" unless attributes.empty?
+      href = tag.locals.item.link
+      text = tag.double? ? tag.expand : tag.locals.item.title
+      %{<a href="#{href}"#{attributes}>#{text}</a>}
     end
-
+    
+    tag "feed:uri" do |tag|
+      tag.locals.item.link
+    end
+    
     # feed:content tag attributes
     # ===========================
     #
