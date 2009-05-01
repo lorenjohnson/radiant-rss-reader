@@ -246,7 +246,7 @@ module FeedParser
         end
       end
       # Date
-      if (e = item.elements['issued'] || e = item.elements['created']) && e.text
+      if (e = item.elements['issued'] || e = item.elements['created'] || e = item.elements['published']) && e.text
         begin
           @date = Time::xmlschema(e.text)
         rescue
