@@ -32,7 +32,7 @@ Download the tarball from http://github.com/lorenjohnson/radiant-rss-reader/tarb
 Use it in your page like this (just an example):
 
     <dl>
-     <r:feed:items url="http://www.somefeed.com/rss limit="5">
+     <r:feed:items url="http://www.somefeed.com/rss" limit="5">
       <dt><r:feed:link /> - by <r:feed:creator />, <r:feed:date format="%b %d"/></dt>
       <dd><r:feed:content /></dd>
      </r:feed:items>
@@ -86,5 +86,7 @@ Port to Extension:
 Modifications:
 
 * James MacAulay (jmacaulay@gmail.com, http://jmacaulay.net/)
+* Michael Hale (mikehale@gmail.com, http://michaelahale.com/)
+* Bryan Liles (iam@smartic.us, http://smartic.us/)
 
 License - Creative Commons Attribution-Share Alike 2.5 License

@@ -1,5 +1,6 @@
 require 'uri'
 require 'net/http'
+require 'net/https'
 require 'feedparser/feedparser'
 
 module RssReader
@@ -15,8 +16,9 @@ module RssReader
     end
     u = URI::parse(uri)
     begin
-      http = Net::HTTP.start(u.host, u.port)
-      answer = http.get("#{u.path}", { "If-Modified-Since" => since })
+      http = Net::HTTP.new(u.host, u.port)
+      http.use_ssl = true if u.port == 443
+      answer = http.get("#{u.request_uri}", { "If-Modified-Since" => since })
       feed = feed_for(answer.body)
     rescue
       return cached_feed
@@ -115,7 +117,11 @@ module RssReader
       text = tag.double? ? tag.expand : tag.locals.item.title
       %{<a href="#{href}"#{attributes}>#{text}</a>}
     end
-
+    
+    tag "feed:uri" do |tag|
+      tag.locals.item.link
+    end
+    
     # feed:content tag attributes
     # ===========================
     #

@@ -1,3 +1,9 @@
+#### September 15, 2008
+
+* use URI#request_uri to include URI parameters
+* support for HTTPS
+* add <r:feed:uri /> tag to just return the entry's URI instead of a full-blown link
+
 #### May 12, 2008
 
 * Reorganized file structure so that everything lives in vendor/extensions/rss_reader
