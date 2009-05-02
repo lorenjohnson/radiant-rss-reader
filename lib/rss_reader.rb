@@ -18,7 +18,7 @@ module RssReader
     begin
       http = Net::HTTP.new(u.host, u.port)
       http.use_ssl = true if u.port == 443
-      answer = http.get("#{u.request_uri}", { "If-Modified-Since" => since })
+      answer = http.get("#{u.request_uri}", {"If-Modified-Since" => since, 'User-Agent' => 'RadiantCMS rss_reader Extension 0.1'} )
       feed = feed_for(answer.body)
     rescue
       return cached_feed
