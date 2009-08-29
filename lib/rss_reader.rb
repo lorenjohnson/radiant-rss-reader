@@ -143,16 +143,18 @@ module RssReader
     tag "feed:content" do |tag|
       attr = tag.attr.symbolize_keys
       result = tag.locals.item.content
-      if attr[:max_length]
-        l = tag.locals.item.content.size()
-      	maxl = attr[:max_length].to_i
-      	if l > maxl
-      	  result = tag.locals.item.content[0..maxl] + ' ...'
-      	end
-      end
       if result
         result = result.gsub(/\A<p>(.*)<\/p>\z/m,'\1') if attr[:no_p]
         result = result.gsub(/<[^>]+>/, '') if attr[:no_html]
+      end
+      result.strip!
+      result.gsub!(/\s+/, ' ')
+      if attr[:max_length]
+        l = result.size
+      	maxl = attr[:max_length].to_i
+      	if l > maxl
+      	  result = result[0..maxl]
+      	end
       end
       result
     end
