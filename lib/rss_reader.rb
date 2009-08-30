@@ -59,7 +59,7 @@ module RssReader
     
     *Usage:*
 
-    <pre><code><r:find:items url="http://somefeed.com/rss" [cache_time="3600"] [order="creator date desc"] [limit="5"]>...</r:feed:items></code></pre>
+    <pre><code><r:feed:items url="http://somefeed.com/rss" [cache_time="3600"] [order="creator date desc"] [limit="5"]>...</r:feed:items></code></pre>
     }
     tag "feed:items" do |tag|
       attr = tag.attr.symbolize_keys
