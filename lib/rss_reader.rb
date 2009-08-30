@@ -111,7 +111,7 @@ module RssReader
     end
     
     tag "feed:title" do |tag|
-      tag.locals.item.title
+      tag.locals.item.title.gsub(/(&(amp;)?)/, '&amp;')
     end
 
     tag "feed:link" do |tag|
@@ -119,7 +119,7 @@ module RssReader
       attributes = options.inject('') { |s, (k, v)| s << %{#{k.downcase}="#{v}" } }.strip
       attributes = " #{attributes}" unless attributes.empty?
       href = tag.locals.item.link
-      text = tag.double? ? tag.expand : tag.locals.item.title
+      text = tag.double? ? tag.expand : tag.locals.item.title.gsub(/(&(amp;)?)/, '&amp;')
       %{<a href="#{href}"#{attributes}>#{text}</a>}
     end
     
