@@ -5,6 +5,7 @@ require 'feedparser/feedparser'
 
 module RssReader
   include Radiant::Taggable
+  include ActionView::Helpers::DateHelper
   
   def fetch_rss(uri, cache_time)
     c = File.join(ActionController::Base.page_cache_directory, uri.tr(':/','_'))
@@ -176,6 +177,31 @@ module RssReader
         date.strftime(format)
       end
     end
+
+  desc %{
+    Display the time elapsed since the item was posted in a friendly format
+
+    Optional attributes:
+
+    * @use_timestamp_after@: This specifies how many days must elapse before a timestamp
+        is displayed instead of elapsed time. It defaults to 10 days. Specify 0 to never use a timestamp.
+    * @format@: Timestamp format to use if @use_timestamp_after@ is specified. Default is "%A, %B %d, %Y".
+
+    *Usage:*
+
+    <pre><code><r:feed:time_elapsed [format="%b %d"]/></code></pre>
+  }
+  tag "feed:time_elapsed" do |tag|
+    format = (tag.attr['format'] || '%d %b %Y')
+    num_days = tag.attr['use_timestamp_after'].blank? ? 10 : tag.attr['use_timestamp_after'].to_i
+    from_time = tag.locals.item.date.to_time
+    to_time = Time.now
+    if num_days != 0 && (to_time - from_time).round > num_days.days.to_i
+      from_time.strftime(format)
+    else
+    time_ago_in_words(from_time, to_time) + " ago"
+    end
+  end
 
  desc %{
     Display the creator of the rss feed item
