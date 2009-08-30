@@ -213,6 +213,32 @@ module RssReader
     tag "feed:creator" do |tag|
       tag.locals.item.creator
     end
+    
+  desc %{
+    Determine if feed content exceeds a certain length.
 
+    Optional attributes:
+    * @ignore_html@:    determines length after removing html and surrounding whitespace
+
+    *Usage:*
+
+    <pre><code>
+    <r:feed:if_longer_than length="160">
+      ... (<a href="<r:feed:uri />">More</a>)
+    </r:feed:if_longer_than>
+    </code></pre>
+  }
+  tag "feed:if_longer_than" do |tag|
+    attr = tag.attr.symbolize_keys
+    not_to_exceed = attr[:length].to_i
+    content = tag.locals.item.content || ""
+    if attr[:ignore_html]
+      content.gsub!(/<[^>]+>/, '')
+      content.gsub!(/\s+/, '')
+      content.strip!
+    end
+    if content.length > not_to_exceed
+      tag.expand
+    end
+  end
 end
-  
