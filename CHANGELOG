@@ -1,3 +1,12 @@
+#### August 30, 2009
+
+* Added fix for feeds with ampersand in the title
+* Fixed type in tag docs
+* Added feed:if_longer_than tag for better customization of post truncation
+* Added feed:time_elapsed for friendly display of post age
+* Fixed miscalculation of post length due to inline HTML
+* Fixed empty post bug
+
 #### September 15, 2008
 
 * use URI#request_uri to include URI parameters
