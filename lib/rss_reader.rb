@@ -43,12 +43,12 @@ module RssReader
     false
   end
 
-    tag "feed" do |tag|
-      tag.expand
-    end
+  tag "feed" do |tag|
+    tag.expand
+  end
 
 
- desc %{
+  desc %{
     Iterates through items in an rss feed provided as an absolute url to the @url@ attribute.
     
     Optional attributes:
@@ -60,74 +60,74 @@ module RssReader
     *Usage:*
 
     <pre><code><r:feed:items url="http://somefeed.com/rss" [cache_time="3600"] [order="creator date desc"] [limit="5"]>...</r:feed:items></code></pre>
-    }
-    tag "feed:items" do |tag|
-      attr = tag.attr.symbolize_keys
-      result = []
-      begin
-        items = fetch_rss(attr[:url], attr[:cache_time].to_i || 900).items
-      rescue
-        return "<!-- RssReader error: #{$!} -->"
-      end
-      if attr[:order]
-        (tokens = attr[:order].split.map {|t| t.downcase}.reverse).each_index do |i|
-          t = tokens[i]
-          if ['title','link','content','date','creator'].include? t
-            items.sort! {|x,y| (tokens[i-1] == 'desc') ? (y.send(t) <=> x.send(t)) : (x.send(t) <=> y.send(t)) }
-          end
+  }
+  tag "feed:items" do |tag|
+    attr = tag.attr.symbolize_keys
+    result = []
+    begin
+      items = fetch_rss(attr[:url], attr[:cache_time].to_i || 900).items
+    rescue
+      return "<!-- RssReader error: #{$!} -->"
+    end
+    if attr[:order]
+      (tokens = attr[:order].split.map {|t| t.downcase}.reverse).each_index do |i|
+        t = tokens[i]
+        if ['title','link','content','date','creator'].include? t
+          items.sort! {|x,y| (tokens[i-1] == 'desc') ? (y.send(t) <=> x.send(t)) : (x.send(t) <=> y.send(t)) }
         end
       end
-      if attr[:limit]
-        items = items.slice(0,attr[:limit].to_i)
-      end
-      items.each_index do |i|
-      	tag.locals.item = items[i]
-      	tag.locals.last_item = items[i-1] if i > 0
-        result << tag.expand
-      end
-      result
     end
+    if attr[:limit]
+      items = items.slice(0,attr[:limit].to_i)
+    end
+    items.each_index do |i|
+    	tag.locals.item = items[i]
+    	tag.locals.last_item = items[i-1] if i > 0
+      result << tag.expand
+    end
+    result
+  end
 
- desc %{
+  desc %{
     Used when the @feed:items@ tag uses the @order@ attribute. Will enter this block each time the value of the @for@ attribute is different from the previous feed item. Note: Using "date" as the @for@ attribute group by day
     
     *Usage:*
 
     <pre><code><r:feed:header for="{creator|title|link|content|date}">...</r:feed:header></code></pre>
-    }    
+  }    
 
-    tag "feed:header" do |tag|
-      attr = tag.attr.symbolize_keys
-      grouping = attr[:for] || 'date'
-      unless tag.locals.last_item
-        tag.expand
-      else
-        if ['title','link','content','creator'].include? grouping
-          tag.expand if tag.locals.item.send(grouping) != tag.locals.last_item.send(grouping)
-        elsif grouping == 'date'
-          tag.expand if tag.locals.item.send(grouping).strftime("%j%Y") != tag.locals.last_item.send(grouping).strftime("%j%Y")
-        end
+  tag "feed:header" do |tag|
+    attr = tag.attr.symbolize_keys
+    grouping = attr[:for] || 'date'
+    unless tag.locals.last_item
+      tag.expand
+    else
+      if ['title','link','content','creator'].include? grouping
+        tag.expand if tag.locals.item.send(grouping) != tag.locals.last_item.send(grouping)
+      elsif grouping == 'date'
+        tag.expand if tag.locals.item.send(grouping).strftime("%j%Y") != tag.locals.last_item.send(grouping).strftime("%j%Y")
       end
     end
-    
-    tag "feed:title" do |tag|
-      tag.locals.item.title.gsub(/(&(amp;)?)/, '&amp;')
-    end
+  end
+  
+  tag "feed:title" do |tag|
+    tag.locals.item.title.gsub(/(&(amp;)?)/, '&amp;')
+  end
 
-    tag "feed:link" do |tag|
-      options = tag.attr.dup
-      attributes = options.inject('') { |s, (k, v)| s << %{#{k.downcase}="#{v}" } }.strip
-      attributes = " #{attributes}" unless attributes.empty?
-      href = tag.locals.item.link
-      text = tag.double? ? tag.expand : tag.locals.item.title.gsub(/(&(amp;)?)/, '&amp;')
-      %{<a href="#{href}"#{attributes}>#{text}</a>}
-    end
-    
-    tag "feed:uri" do |tag|
-      tag.locals.item.link
-    end
+  tag "feed:link" do |tag|
+    options = tag.attr.dup
+    attributes = options.inject('') { |s, (k, v)| s << %{#{k.downcase}="#{v}" } }.strip
+    attributes = " #{attributes}" unless attributes.empty?
+    href = tag.locals.item.link
+    text = tag.double? ? tag.expand : tag.locals.item.title.gsub(/(&(amp;)?)/, '&amp;')
+    %{<a href="#{href}"#{attributes}>#{text}</a>}
+  end
+  
+  tag "feed:uri" do |tag|
+    tag.locals.item.link
+  end
 
- desc %{
+  desc %{
     Display the contents of the rss feed item
 
     Optional attributes:
@@ -139,28 +139,28 @@ module RssReader
     *Usage:*
 
     <pre><code><r:feed:content  [max_length="140"] [no_p="true"] [no_html="true"]/></code></pre>
-    }   
+  }   
 
-    tag "feed:content" do |tag|
-      attr = tag.attr.symbolize_keys
-      result = tag.locals.item.content || ""
-      if result
-        result = result.gsub(/\A<p>(.*)<\/p>\z/m,'\1') if attr[:no_p]
-        result = result.gsub(/<[^>]+>/, '') if attr[:no_html]
-      end
-      result.strip!
-      result.gsub!(/\s+/, ' ')
-      if attr[:max_length]
-        l = result.size
-      	maxl = attr[:max_length].to_i
-      	if l > maxl
-      	  result = result[0..maxl]
-      	end
-      end
-      result
+  tag "feed:content" do |tag|
+    attr = tag.attr.symbolize_keys
+    result = tag.locals.item.content || ""
+    if result
+      result = result.gsub(/\A<p>(.*)<\/p>\z/m,'\1') if attr[:no_p]
+      result = result.gsub(/<[^>]+>/, '') if attr[:no_html]
     end
+    result.strip!
+    result.gsub!(/\s+/, ' ')
+    if attr[:max_length]
+      l = result.size
+    	maxl = attr[:max_length].to_i
+    	if l > maxl
+    	  result = result[0..maxl]
+    	end
+    end
+    result
+  end
 
- desc %{
+  desc %{
     Display the date of the rss feed item
 
     Optional attributes:
@@ -170,13 +170,13 @@ module RssReader
     *Usage:*
 
     <pre><code><r:feed:date  [format="%b %d"]/></code></pre>
-    } 
-    tag "feed:date" do |tag|
-      format = (tag.attr['format'] || '%A, %B %d, %Y') 
-      if date = tag.locals.item.date
-        date.strftime(format)
-      end
+  } 
+  tag "feed:date" do |tag|
+    format = (tag.attr['format'] || '%A, %B %d, %Y') 
+    if date = tag.locals.item.date
+      date.strftime(format)
     end
+  end
 
   desc %{
     Display the time elapsed since the item was posted in a friendly format
@@ -199,20 +199,20 @@ module RssReader
     if num_days != 0 && (to_time - from_time).round > num_days.days.to_i
       from_time.strftime(format)
     else
-    time_ago_in_words(from_time, to_time) + " ago"
+      time_ago_in_words(from_time, to_time) + " ago"
     end
   end
 
- desc %{
+  desc %{
     Display the creator of the rss feed item
     
     *Usage:*
 
     <pre><code><r:feed:creator/></code></pre>
-    } 
-    tag "feed:creator" do |tag|
-      tag.locals.item.creator
-    end
+  } 
+  tag "feed:creator" do |tag|
+    tag.locals.item.creator
+  end
     
   desc %{
     Determine if feed content exceeds a certain length.
