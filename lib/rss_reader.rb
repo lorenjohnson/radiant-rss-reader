@@ -43,10 +43,26 @@ module RssReader
     false
   end
 
+  def sql_sort(items, query)
+    columns = query.split(',')
+    instructions = columns.map do |column|
+      col, order = column.split
+      order ||= 'asc'
+      [col, order.downcase != 'desc']
+    end
+
+    items.sort do |first, second|
+      first_values, second_values = instructions.map { |column, ascending|
+        duple = [first[column], second[column]]
+        ascending ? duple : duple.reverse
+      }.transpose
+      first_values <=> second_values
+    end
+  end
+
   tag "feed" do |tag|
     tag.expand
   end
-
 
   desc %{
     Iterates through items in an rss feed provided as an absolute url to the @url@ attribute.
@@ -54,8 +70,9 @@ module RssReader
     Optional attributes:
 
     * @cache_time@: length of time to cache the feed before seeing if it's been updated
-    * @order@:      works just like SQL 'ORDER BY' clauses, e.g. order='creator date desc' orders first by creator ascending, then date descending
+    * @order@:      works just like SQL 'ORDER BY' clauses, e.g. order='creator, date desc' orders first by creator ascending, then date descending
     * @limit@:      only return the first x items (after any ordering)
+    * @matching@:   only return items whose string representation matches this regular expression
     
     *Usage:*
 
@@ -64,27 +81,26 @@ module RssReader
   tag "feed:items" do |tag|
     attr = tag.attr.symbolize_keys
     result = []
+
     begin
       items = fetch_rss(attr[:url], attr[:cache_time].to_i || 900).items
     rescue
       return "<!-- RssReader error: #{$!} -->"
     end
-    if attr[:order]
-      (tokens = attr[:order].split.map {|t| t.downcase}.reverse).each_index do |i|
-        t = tokens[i]
-        if ['title','link','content','date','creator'].include? t
-          items.sort! {|x,y| (tokens[i-1] == 'desc') ? (y.send(t) <=> x.send(t)) : (x.send(t) <=> y.send(t)) }
-        end
-      end
-    end
-    if attr[:limit]
-      items = items.slice(0,attr[:limit].to_i)
-    end
-    items.each_index do |i|
-    	tag.locals.item = items[i]
-    	tag.locals.last_item = items[i-1] if i > 0
+
+    items = sql_sort(items, attr[:order]) if attr[:order]
+    items = items.slice(0, attr[:limit].to_i) if attr[:limit]
+
+    attr[:matching] = Regexp.new(attr[:matching]) if attr[:matching]
+    last_item = nil
+    items.each do |item|
+      next if attr[:matching] and !item.to_s.match(attr[:matching])
+    	tag.locals.item = item
+    	tag.locals.last_item = last_item if last_item
       result << tag.expand
+      last_item = item
     end
+
     result
   end
 
