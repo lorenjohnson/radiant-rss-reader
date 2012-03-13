@@ -76,11 +76,11 @@ module RssReader
     
     *Usage:*
 
-    <pre><code><r:feed:items url="http://somefeed.com/rss" [cache_time="3600"] [order="creator date desc"] [limit="5"]>...</r:feed:items></code></pre>
+    <pre><code><r:feed:items url="http://somefeed.com/rss" [cache_time="3600"] [order="creator, date desc"] [limit="5"]>...</r:feed:items></code></pre>
   }
   tag "feed:items" do |tag|
     attr = tag.attr.symbolize_keys
-    result = []
+    result = ""
 
     begin
       items = fetch_rss(attr[:url], attr[:cache_time].to_i || 900).items
@@ -97,11 +97,36 @@ module RssReader
       next if attr[:matching] and !item.to_s.match(attr[:matching])
     	tag.locals.item = item
     	tag.locals.last_item = last_item if last_item
-      result << tag.expand
+      result << tag.expand.strip
       last_item = item
     end
 
     result
+  end
+
+  desc %{
+    The number of items in the feed.
+
+    Optional attributes:
+
+    * @matching@:   only count items whose string representation matches this regular expression
+
+    *Usage:*
+
+    <pre><code><r:feed:item_count url="http://somefeed.com/rss" cache_time="3600" /></code></pre>
+  }
+  tag "feed:item_count" do |tag|
+    attr = tag.attr.symbolize_keys
+    result = []
+    begin
+      items = fetch_rss(attr[:url], attr[:cache_time].to_i || 900).items
+    rescue
+      return "<!-- RssReader error: #{$!} -->"
+    end
+
+    pattern = Regexp.new(attr[:matching]) if attr[:matching]
+    items.reject! {|i| i.to_s.match(pattern).nil? } if attr[:matching]
+    items.size.to_s
   end
 
   desc %{
@@ -126,8 +151,26 @@ module RssReader
     end
   end
   
+  desc %{
+    Display the title of the rss feed item
+
+    Optional attributes:
+    * @filter@:     displays only the portion matching the regular expression
+    
+    *Usage:*
+
+    <pre><code><r:feed:content  [max_length="140"] [no_p="true"] [no_html="true"]/></code></pre>
+  }   
   tag "feed:title" do |tag|
-    tag.locals.item.title.gsub(/(&(amp;)?)/, '&amp;')
+    attr = tag.attr.symbolize_keys
+    result = tag.locals.item.title || ""
+    result.gsub!(/(&(amp;)?)/, '&amp;')
+    if attr[:filter]
+      r = Regexp.new(attr[:filter])
+      md = result.match(r)
+      result = md.to_a.first if md
+    end
+    result
   end
 
   tag "feed:link" do |tag|
@@ -151,6 +194,7 @@ module RssReader
     * @max_length@: no-nonsense truncation
     * @no_p@:       takes out just the enclosing paragraph tags that FeedParser puts in
     * @no_html@:    takes out *all* html
+    * @filter@:     displays only the portion matching the regular expression
     
     *Usage:*
 
@@ -160,6 +204,11 @@ module RssReader
   tag "feed:content" do |tag|
     attr = tag.attr.symbolize_keys
     result = tag.locals.item.content || ""
+    if attr[:filter]
+      r = Regexp.new(attr[:filter])
+      md = result.match(r)
+      result = md.to_a.first if md
+    end
     if result
       result = result.gsub(/\A<p>(.*)<\/p>\z/m,'\1') if attr[:no_p]
       result = result.gsub(/<[^>]+>/, '') if attr[:no_html]
