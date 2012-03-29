@@ -275,6 +275,7 @@ module RssReader
     num_days = tag.attr['use_timestamp_after'].blank? ? 10 : tag.attr['use_timestamp_after'].to_i
     from_time = tag.locals.item.date.to_time
     to_time = Time.now
+    to_time = Time.now.utc if from_time.utc?
     if num_days != 0 && (to_time - from_time).round > num_days.days.to_i
       from_time.strftime(format)
     else
