@@ -12,7 +12,6 @@ module RssReader
     c = File.join(ActionController::Base.page_cache_directory, uri.tr(':/','_'))
     if (cached_feed = feed_for(IO.read(c)) rescue nil)
       if File.mtime(c) > (Time.now - cache_time)
-        logger.info "Returning cached feed"
         return cached_feed 
       end
       since = File.mtime(c).httpdate
@@ -26,7 +25,6 @@ module RssReader
       answer = http.get("#{u.request_uri}", {"If-Modified-Since" => since, 'User-Agent' => 'RadiantCMS rss_reader Extension 0.1'} )
       feed = feed_for(answer.body)
     rescue
-      logger.info "Returning cached feed"
       return cached_feed
     end
     case answer.code
