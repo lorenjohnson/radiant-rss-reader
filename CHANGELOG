@@ -1,3 +1,8 @@
+#### March 29, 2012
+
+* Added support for unescaping html in feed content
+* Added support for more RSS syntaxes
+
 #### August 30, 2009
 
 * Added fix for feeds with ampersand in the title

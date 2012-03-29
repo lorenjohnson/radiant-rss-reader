@@ -2,6 +2,7 @@ require 'uri'
 require 'net/http'
 require 'net/https'
 require 'feedparser/feedparser'
+require 'htmlentities'
 
 module RssReader
   include Radiant::Taggable
@@ -10,7 +11,10 @@ module RssReader
   def fetch_rss(uri, cache_time)
     c = File.join(ActionController::Base.page_cache_directory, uri.tr(':/','_'))
     if (cached_feed = feed_for(IO.read(c)) rescue nil)
-      return cached_feed if File.mtime(c) > (Time.now - cache_time)
+      if File.mtime(c) > (Time.now - cache_time)
+        logger.info "Returning cached feed"
+        return cached_feed 
+      end
       since = File.mtime(c).httpdate
     else
       since = "1970-01-01 00:00:00"
@@ -22,6 +26,7 @@ module RssReader
       answer = http.get("#{u.request_uri}", {"If-Modified-Since" => since, 'User-Agent' => 'RadiantCMS rss_reader Extension 0.1'} )
       feed = feed_for(answer.body)
     rescue
+      logger.info "Returning cached feed"
       return cached_feed
     end
     case answer.code
@@ -82,8 +87,10 @@ module RssReader
     attr = tag.attr.symbolize_keys
     result = ""
 
+    feed_uri = URI.parse(attr[:url])
+    tag.locals.feed_uri = feed_uri
     begin
-      items = fetch_rss(attr[:url], attr[:cache_time].to_i || 900).items
+      items = fetch_rss(feed_uri.to_s, attr[:cache_time].to_i || 900).items
     rescue
       return "<!-- RssReader error: #{$!} -->"
     end
@@ -109,11 +116,13 @@ module RssReader
 
     Optional attributes:
 
+    * @limit@:      return x or the number of items, which ever is lesser
+    * @cache_time@: length of time to cache the feed before seeing if it's been updated
     * @matching@:   only count items whose string representation matches this regular expression
 
     *Usage:*
 
-    <pre><code><r:feed:item_count url="http://somefeed.com/rss" cache_time="3600" /></code></pre>
+        <pre><code><r:feed:item_count url="http://somefeed.com/rss" [cache_time="3600"] [limit="5"] /></code></pre>
   }
   tag "feed:item_count" do |tag|
     attr = tag.attr.symbolize_keys
@@ -123,7 +132,7 @@ module RssReader
     rescue
       return "<!-- RssReader error: #{$!} -->"
     end
-
+    items = items.slice(0, attr[:limit].to_i) if attr[:limit]
     pattern = Regexp.new(attr[:matching]) if attr[:matching]
     items.reject! {|i| i.to_s.match(pattern).nil? } if attr[:matching]
     items.size.to_s
@@ -170,7 +179,7 @@ module RssReader
       md = result.match(r)
       result = md.to_a.first if md
     end
-    result
+    result.strip
   end
 
   tag "feed:link" do |tag|
@@ -194,11 +203,12 @@ module RssReader
     * @max_length@: no-nonsense truncation
     * @no_p@:       takes out just the enclosing paragraph tags that FeedParser puts in
     * @no_html@:    takes out *all* html
+    * @unescape_html@:    attempts to unescape HTML in the content
     * @filter@:     displays only the portion matching the regular expression
     
     *Usage:*
 
-    <pre><code><r:feed:content  [max_length="140"] [no_p="true"] [no_html="true"]/></code></pre>
+    <pre><code><r:feed:content  [max_length="140"] [no_p="true"] [no_html="true"] [unescape_html="false"] /></code></pre>
   }   
 
   tag "feed:content" do |tag|
@@ -210,8 +220,12 @@ module RssReader
       result = md.to_a.first if md
     end
     if result
-      result = result.gsub(/\A<p>(.*)<\/p>\z/m,'\1') if attr[:no_p]
-      result = result.gsub(/<[^>]+>/, '') if attr[:no_html]
+      result = HTMLEntities.new.decode(result) if attr[:unescape_html] == 'true'
+      if attr[:no_p] == 'true'
+        result.gsub!('<p>', '')
+        result.gsub!('</p>', '')
+      end
+      result.gsub!(/<[^>]+>/, '') if attr[:no_html] == 'true'
     end
     result.strip!
     result.gsub!(/\s+/, ' ')
