@@ -173,12 +173,14 @@ module FeedParser
       end
       # Content
       if (e = item.elements['content:encoded']) ||
-        (e = item.elements['description'] || item.elements['rss:description'])
+        (e = item.elements['description'] || item.elements['rss:description']) ||
+        (e = item.elements['content'])
         @content = FeedParser::getcontent(e, @feed)
       end
       # Date
       if e = item.elements['dc:date'] || item.elements['pubDate'] || 
-          item.elements['rss:pubDate']
+          item.elements['rss:pubDate'] || item.elements['published'] ||
+          item.elements['updated']
         begin
           @date = Time::xmlschema(e.text)
         rescue

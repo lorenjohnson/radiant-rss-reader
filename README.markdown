@@ -10,11 +10,13 @@ If-Modified-Since HTTP header).
 
 ## via Git
 
+    gem install htmlentities
     cd RADIANT_APP_ROOT
     git clone git://github.com/lorenjohnson/radiant-rss-reader.git vendor/extensions/rss_reader
 
 ## via Git (as submodule)
   
+    gem install htmlentities
     cd RADIANT_APP_ROOT
     git submodule add git://github.com/lorenjohnson/radiant-rss-reader.git vendor/extensions/rss_reader
 
@@ -24,6 +26,7 @@ If-Modified-Since HTTP header).
 
 Download the tarball from http://github.com/lorenjohnson/radiant-rss-reader/tarball/master into `RADIANT_APP_ROOT/vendor/extentions`, then:
 
+    gem install htmlentities
     cd RADIANT_APP_ROOT/vendor/extentions
     tar xvzf lorenjohnson-radiant-rss-reader.tgz
     mv lorenjohnson-radiant-rss-reader rss_reader
